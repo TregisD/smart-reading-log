@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📊 Reading Stats</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; color: #333; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f9f9f9; }
+        .Read { background-color: #d4edda; }        /* green */
+        .Currently_Reading { background-color: #fff3cd; }     /* yellow */
+        .Readlist { background-color: #f8d7da; }   /* red */
+    </style>
+</head>
+<body>
+    <h1>📊 My Reading Stats</h1>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+        </tr>
+        {% for title, author, start, end, status in books %}
+        <tr class="{{ status.replace(' ', '_') }}">
+            <td>{{ title }}</td>
+            <td>{{ author }}</td>
+            <td>{{ start if start else '-' }}</td>
+            <td>{{ end if end else '-' }}</td>
+            <td>{{ status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

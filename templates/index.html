@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Book Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    .menu { display: flex; justify-content: center; gap: 20px; }
+    .card {
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      width: 200px;
+      text-decoration: none;
+      color: black;
+      background: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+    .card:hover { background: #eee; }
+  </style>
+</head>
+<body>
+  <h1>📚 My Book Tracker</h1>
+  <p>Choose what you want to see:</p>
+
+  <div class="menu">
+    <a href="{{ url_for('show_books') }}" class="card">📖 Books</a>
+    <a href="{{ url_for('show_ratings') }}" class="card">⭐ Ratings</a>
+    <a href="{{ url_for('show_reading_stats') }}" class="card">📊 Reading Stats</a>
+  </div>
+</body>
+</html>
