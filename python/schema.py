@@ -1,10 +1,25 @@
--- Tables
+import psycopg2
+
+DB_NAME = "books_db"
+DB_USER = "leoguzman"
+DB_PASS = ""
+DB_HOST = "localhost"
+DB_PORT = "5432"
+
+conn = psycopg2.connect(
+    dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT
+)
+cur = conn.cursor()
+
+# Create schema (only run once!)
+cur.execute("""
+-- Users table (with CREATE IF NOT EXISTS to be safe)
 CREATE TABLE IF NOT EXISTS users (
   user_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE
 );
 
--- Drop old tables if they exist (so you can re-run this safely)
+-- Drop and recreate other tables (only on initial setup)
 DROP TABLE IF EXISTS ratings CASCADE;
 DROP TABLE IF EXISTS reading_log CASCADE;
 DROP TABLE IF EXISTS books CASCADE;
@@ -51,8 +66,7 @@ CREATE TABLE ratings (
     UNIQUE (book_id)
 );
 
--- Helpful view: reading stats (days_to_finish, pages_per_day)
-CREATE VIEW reading_stats AS
+CREATE OR REPLACE VIEW reading_stats AS
 SELECT
   rl.log_id,
   rl.user_id,
@@ -71,3 +85,10 @@ SELECT
 FROM reading_log rl
 JOIN books b ON rl.book_id = b.book_id
 JOIN users u ON rl.user_id = u.user_id;
+""")
+
+conn.commit()
+cur.close()
+conn.close()
+
+print("✅ Schema created successfully!")

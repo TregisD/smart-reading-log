@@ -1,7 +1,12 @@
 from flask import Flask, render_template
 import psycopg2
+import os
 
-app = Flask(__name__)
+# Get the parent directory (smart-reading-log/)
+basedir = os.path.abspath(os.path.dirname(__file__))
+template_dir = os.path.join(os.path.dirname(basedir), 'templates')
+
+app = Flask(__name__, template_folder=template_dir)
 
 # Database connection details
 DB_HOST = "localhost"
@@ -63,7 +68,7 @@ def show_reading_stats():
                CASE
                    WHEN rl.start_date IS NOT NULL AND rl.end_date IS NOT NULL THEN 'Read'
                    WHEN rl.start_date IS NOT NULL AND rl.end_date IS NULL THEN 'Currently_Reading'
-                   ELSE 'Readlist'
+                   ELSE 'Plan_to_Read'
                END AS status
         FROM books b
         LEFT JOIN reading_log rl
