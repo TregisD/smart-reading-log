@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leonardo's Reading Profile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            color: #7700ff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #000000;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(233, 69, 96, 0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+        }
+
+        .left-panel {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            height: fit-content;
+        }
+
+        .analytics-btn {
+            width: 100%;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #7700ff 0%, #7700ff 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .analytics-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(233, 69, 96, 0.4);
+        }
+
+        .analytics-btn i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            font-style: normal;
+        }
+
+        .user-info {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 2px solid rgba(233, 69, 96, 0.3);
+        }
+
+        .user-info p {
+            margin: 10px 0;
+            color: #000000;
+        }
+
+        .user-info strong {
+            color: #7700ff;
+        }
+
+        .right-panel {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+        }
+
+        .statistics {
+            margin-bottom: 40px;
+        }
+
+        .statistics h2 {
+            color: #7700ff;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .progress-container {
+            margin-bottom: 25px;
+        }
+
+        .progress-bar {
+            display: flex;
+            width: 100%;
+            height: 35px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.3s;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        .progress-segment:hover {
+            filter: brightness(1.2);
+        }
+        
+        .progress-segment:empty {
+            display: none;
+        }
+
+        .completed {
+            background: #4a90e2;
+        }
+
+        .reading {
+            background: #f39c12;
+        }
+
+        .plan-to-read {
+            background: #95a5a6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #000000;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .label {
+            color: #a0a0a0;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .value {
+            color: #7700ff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .recent-updates {
+            margin-top: 40px;
+        }
+
+        .recent-updates h3 {
+            color: #7700ff;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .books-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .book-card {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #000000;
+            padding: 20px;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.2);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .book-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .book-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #e0e0e0;
+        }
+
+        .book-author {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .book-status {
+            font-size: 13px;
+            color: #7700ff;
+            margin-top: auto;
+        }
+
+        .book-date {
+            color: #ffffff;
+            font-size: 12px;
+            text-align: center;
+            padding-top: 10px;
+            border-top: 1px solid rgba(233, 69, 96, 0.2);
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .books-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 LEONARDO'S Reading Profile</h1>
+            <nav class="nav-links">
+                <a href="/">Home</a>
+                <a href="/books">All Books</a>
+                <a href="/ratings">Ratings</a>
+                <a href="/reading_stats">Reading Stats</a>
+            </nav>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <a href="/analytics" class="analytics-btn">
+                    <i>📊</i>
+                    Analytics Dashboard
+                </a>
+                
+                <div class="user-info">
+                    <p><strong>Member Since:</strong> 
+                        {% if member_since %}
+                            {{ member_since.strftime('%B %d, %Y') }}
+                        {% else %}
+                            2025
+                        {% endif %}
+                    </p>
+                    <p><strong>Total Books:</strong> {{ total_books }}</p>
+                    <p><strong>Pages Read:</strong> {{ "{:,}".format(total_pages) }}</p>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="statistics">
+                    <h2>Reading Statistics</h2>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            {% set completed_pct = (completed / total_books * 100) if total_books > 0 else 0 %}
+                            {% set reading_pct = (reading / total_books * 100) if total_books > 0 else 0 %}
+                            {% set plan_pct = (plan_to_read / total_books * 100) if total_books > 0 else 0 %}
+                            
+                            <div class="progress-segment completed" style="width: {{ completed_pct }}%;">
+                                Completed: {{ completed }}
+                            </div>
+                            <div class="progress-segment reading" style="width: {{ reading_pct }}%;">
+                                Reading: {{ reading }}
+                            </div>
+                            <div class="progress-segment plan-to-read" style="width: {{ plan_pct }}%;">
+                                Plan: {{ plan_to_read }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="label">Total Books</div>
+                            <div class="value">{{ total_books }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">Avg Rating</div>
+                            <div class="value">{{ avg_rating }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">Pages/Day</div>
+                            <div class="value">{{ pages_per_day }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">This Month</div>
+                            <div class="value">{{ books_this_month }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">This Year</div>
+                            <div class="value">{{ books_this_year }}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">Total Pages</div>
+                            <div class="value">{{ "%.1f" | format(total_pages / 1000) }}k</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-updates">
+                    <h3>Recent Updates</h3>
+                    
+                    <div class="books-container">
+                        {% for book in recent_books %}
+                        <div class="book-card">
+                            <div class="book-cover">📖</div>
+                            <div class="book-info">
+                                <div class="book-title">{{ book[0] }}</div>
+                                <div class="book-author">by {{ book[1] }}</div>
+                                <div class="book-status">
+                                    {{ book[5] }}
+                                    {% if book[4] %}
+                                     • Rated {{ book[4] }}/5
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="book-date">
+                                {% if book[3] %}
+                                    {{ book[3].strftime('%b %d, %Y') }}
+                                {% elif book[2] %}
+                                    {{ book[2].strftime('%b %d, %Y') }}
+                                {% else %}
+                                    Recently added
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
