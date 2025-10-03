@@ -20,7 +20,7 @@ I want to create a dashboard that tracks the books you read using an Interactive
 * You're recent updates (Last three books updated)
 
 #### Preview:
-[add when finished]
+![](images/HomePage_V1.png)
 
 
 ### The analytics page displays:
