@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            color: #7700ff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #000000;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(233, 69, 96, 0.2);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .chart-card {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .chart-card h2 {
+            color: #7700ff;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: #000000;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #a0a0a0;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: #7700ff;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Analytics Dashboard</h1>
+            <nav class="nav-links">
+                <a href="/">Home</a>
+                <a href="/books">All Books</a>
+                <a href="/ratings">Ratings</a>
+                <a href="/reading_stats">Reading Stats</a>
+            </nav>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="chart-card">
+                <h2>Rating Breakdown by Category</h2>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <div class="stats-summary">
+                    <div class="stat-item">
+                        <div class="stat-label">Story</div>
+                        <div class="stat-value">{{ avg_story }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Characters</div>
+                        <div class="stat-value">{{ avg_characters }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Writing</div>
+                        <div class="stat-value">{{ avg_writing }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Themes</div>
+                        <div class="stat-value">{{ avg_themes }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Enjoyment</div>
+                        <div class="stat-value">{{ avg_enjoyment }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Radar Chart for Rating Breakdown
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        
+        // Get data from template
+        const avgStory = parseFloat('{{ avg_story }}') || 0;
+        const avgCharacters = parseFloat('{{ avg_characters }}') || 0;
+        const avgWriting = parseFloat('{{ avg_writing }}') || 0;
+        const avgThemes = parseFloat('{{ avg_themes }}') || 0;
+        const avgEnjoyment = parseFloat('{{ avg_enjoyment }}') || 0;
+        
+        const radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Story', 'Characters', 'Writing', 'Themes', 'Enjoyment'],
+                datasets: [{
+                    label: 'Average Rating',
+                    data: [avgStory, avgCharacters, avgWriting, avgThemes, avgEnjoyment],
+                    backgroundColor: 'rgba(128, 0, 128, 0.2)',
+                    borderColor: '#7700ff',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#7700ff',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#7700ff',
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1,
+                layout: {
+                    padding: 20
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1,
+                            color: '#000000',
+                            backdropColor: 'transparent'
+                        },
+                        grid: {
+                            color: 'rgba(160, 160, 160, 0.2)'
+                        },
+                        pointLabels: {
+                            color: '#000000',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f3460',
+                        titleColor: '#e94560',
+                        bodyColor: '#000000',
+                        borderColor: '#e94560',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.r + ' / 5.0';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

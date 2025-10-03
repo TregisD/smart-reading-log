@@ -72,18 +72,17 @@ def home():
     """)
     books_this_year = cur.fetchone()[0]
     
-    # Calculate average pages per day (only for completed books)
+    # Calculate average pages per day (total pages / days since member)
     cur.execute("""
-        SELECT ROUND(AVG(
-            CASE 
-                WHEN (rl.end_date - rl.start_date) > 0 
-                THEN b.pages::numeric / (rl.end_date - rl.start_date)
-                ELSE NULL
-            END
-        ), 0) as avg_pages_per_day
+        SELECT 
+            ROUND(
+                COALESCE(SUM(b.pages), 0)::numeric / 
+                NULLIF(CURRENT_DATE - MIN(rl.start_date), 0),
+                0
+            ) as avg_pages_per_day
         FROM reading_log rl
         JOIN books b ON rl.book_id = b.book_id
-        WHERE rl.end_date IS NOT NULL 
+        WHERE rl.end_date IS NOT NULL
             AND rl.start_date IS NOT NULL
             AND b.pages IS NOT NULL
             AND rl.user_id = (SELECT user_id FROM users WHERE name = 'Leonardo Guzman');
@@ -203,6 +202,33 @@ def show_reading_stats():
     conn.close()
     
     return render_template("reading_stats.html", books=books)
+
+@app.route("/analytics")
+def show_analytics():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Get average rating by category
+    cur.execute("""
+        SELECT 
+            ROUND(AVG(story), 1) as avg_story,
+            ROUND(AVG(characters), 1) as avg_characters,
+            ROUND(AVG(writing), 1) as avg_writing,
+            ROUND(AVG(themes), 1) as avg_themes,
+            ROUND(AVG(enjoyment), 1) as avg_enjoyment
+        FROM ratings;
+    """)
+    rating_breakdown = cur.fetchone()
+    
+    cur.close()
+    conn.close()
+    
+    return render_template("analytics.html", 
+                         avg_story=rating_breakdown[0] or 0,
+                         avg_characters=rating_breakdown[1] or 0,
+                         avg_writing=rating_breakdown[2] or 0,
+                         avg_themes=rating_breakdown[3] or 0,
+                         avg_enjoyment=rating_breakdown[4] or 0)
 
 
 if __name__ == "__main__":
