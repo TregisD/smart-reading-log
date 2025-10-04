@@ -11,7 +11,7 @@ It is designed to showcase both:
 ## Part 1: Business Analytics Dashboard (Interactive Web Dashboard with SQL Data)
 I want to create a dashboard that tracks the books you read using an Interactive Web Dashboard with SQL Data. I will be adding a rating system to keep track of how much one likes a book. The rating system will contain five sub-categories: Story & Pacing, Characters & Development, Writing Style, Themes & Depth, and Emotional Impact & Enjoyment. This system will allow more in-depth analysis of how one rates a book. There will be multiple pages.
 
-### The home page displays:
+### The Home page displays:
 * When you became a member (your earliest start date)
 * The total books in your database that include the ones you've completed, you're reading, and that you plan to read
 * The average number of pages you read a day
@@ -20,7 +20,30 @@ I want to create a dashboard that tracks the books you read using an Interactive
 * You're recent updates (Last three books updated)
 
 #### Preview:
-![](images/HomePage_V1.png)
+![](images/HomePage_V2.png)
+
+
+### The All Books page displays information on the books in your list, such as:
+* Title
+* Author
+* Genre
+* Pages You've Read / Total Pages
+* Reading Status
+* Rating (If you click on the rating button, it shows the distribution of which categories got what score)
+* Edit button
+
+#### Preview:
+![](images/Booklist_V1.png)
+
+
+### The Add Book and Edit Book pages allow you to input or edit:
+* All the information in the All Books page
+* Current pages read
+* Start and End dates
+* ISBN
+
+#### Preview (the edit book page looks the same with a different title):
+![](images/Add_book_V1.png)
 
 
 ### The analytics page displays:
@@ -35,8 +58,6 @@ I want to create a dashboard that tracks the books you read using an Interactive
 
 
 ## Things I need to work on asap:
-* Adding a way to add how many pages you've read so far, like 76/200, so that the number of pages can be added to the data shown or analyzed
-* Making the All Books, Ratings, Reading Stats connected to the UI (maybe combining them)
 * More of the analytics page
 
 
