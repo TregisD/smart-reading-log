@@ -40,6 +40,7 @@ CREATE TABLE reading_log (
   book_id INTEGER NOT NULL REFERENCES books(book_id) ON DELETE CASCADE,
   start_date DATE,
   end_date DATE,
+  current_page INTEGER,
   UNIQUE (user_id, book_id)
 );
 
@@ -76,6 +77,7 @@ SELECT
   b.pages,
   rl.start_date,
   rl.end_date,
+  rl.current_page,
   (rl.end_date - rl.start_date) AS days_to_finish,
   CASE
     WHEN (rl.end_date - rl.start_date) > 0 AND b.pages IS NOT NULL

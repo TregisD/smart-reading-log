@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Book</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #7700ff 100%);
+            color: #000000;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            color: #7700ff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #000000;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(140, 0, 255, 0.2);
+        }
+
+        .form-container {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            color: #7700ff;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid rgba(144, 0, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: #000000;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            background: #ffffff;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            color: #737373;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #7700ff;
+        }
+
+        .rating-group {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .rating-input {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .rating-input label {
+            color: #a0a0a0;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .rating-input input {
+            text-align: center;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #7700ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #7700ff;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .success-message {
+            background: rgba(74, 144, 226, 0.2);
+            color: #4a90e2;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(233, 69, 96, 0.2);
+            color: #e94560;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rating-group {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Add New Book</h1>
+            <nav class="nav-links">
+                <a href="/">Home</a>
+                <a href="/books">All Books</a>
+                <a href="/add_book">Add Book</a>
+                <a href="/analytics">Analytics</a>
+            </nav>
+        </header>
+
+        <div class="form-container">
+            <div id="successMessage" class="success-message"></div>
+            <div id="errorMessage" class="error-message"></div>
+
+            <form id="bookForm">
+                <div class="form-section">
+                    <h2>Book Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="title">Title *</label>
+                            <input type="text" id="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="author">Author *</label>
+                            <input type="text" id="author" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="isbn">ISBN *</label>
+                            <input type="text" id="isbn" required>
+                            <span class="helper-text">10 or 13 digit ISBN number</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="pages">Total Pages *</label>
+                            <input type="number" id="pages" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="genre">Genre *</label>
+                            <input type="text" id="genre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="published_year">Published Year</label>
+                            <input type="number" id="published_year" min="1000" max="2100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Reading Progress</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="current_page">Current Page</label>
+                            <input type="number" id="current_page" min="0" value="0">
+                            <span class="helper-text">0 = Plan to Read, 1-[pages-1] = Reading, [pages] = Completed</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="start_date">Start Date</label>
+                            <input type="date" id="start_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="end_date">End Date</label>
+                            <input type="date" id="end_date">
+                            <span class="helper-text">Leave empty if not completed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Ratings (Optional)</h2>
+                    <p class="helper-text" style="margin-bottom: 15px;">Rate from 1.0 to 5.0 in increments of 0.5</p>
+                    <div class="rating-group">
+                        <div class="rating-input">
+                            <label for="story">Story</label>
+                            <input type="number" id="story" min="1" max="5" step="0.5">
+                        </div>
+                        <div class="rating-input">
+                            <label for="characters">Characters</label>
+                            <input type="number" id="characters" min="1" max="5" step="0.5">
+                        </div>
+                        <div class="rating-input">
+                            <label for="writing">Writing</label>
+                            <input type="number" id="writing" min="1" max="5" step="0.5">
+                        </div>
+                        <div class="rating-input">
+                            <label for="themes">Themes</label>
+                            <input type="number" id="themes" min="1" max="5" step="0.5">
+                        </div>
+                        <div class="rating-input">
+                            <label for="enjoyment">Enjoyment</label>
+                            <input type="number" id="enjoyment" min="1" max="5" step="0.5">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear</button>
+                    <button type="submit" class="btn btn-primary">Add Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('bookForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                title: document.getElementById('title').value,
+                author: document.getElementById('author').value,
+                isbn: document.getElementById('isbn').value,
+                pages: document.getElementById('pages').value,
+                genre: document.getElementById('genre').value,
+                published_year: document.getElementById('published_year').value || null,
+                current_page: document.getElementById('current_page').value || 0,
+                start_date: document.getElementById('start_date').value || null,
+                end_date: document.getElementById('end_date').value || null,
+                story: document.getElementById('story').value || null,
+                characters: document.getElementById('characters').value || null,
+                writing: document.getElementById('writing').value || null,
+                themes: document.getElementById('themes').value || null,
+                enjoyment: document.getElementById('enjoyment').value || null
+            };
+
+            try {
+                const response = await fetch('/add_book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('success', data.message);
+                    resetForm();
+                    // Redirect to books page after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/books';
+                    }, 2000);
+                } else {
+                    showMessage('error', 'Error: ' + data.error);
+                }
+            } catch (error) {
+                showMessage('error', 'Failed to add book: ' + error.message);
+            }
+        });
+
+        function showMessage(type, message) {
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            if (type === 'success') {
+                successMsg.textContent = message;
+                successMsg.style.display = 'block';
+            } else {
+                errorMsg.textContent = message;
+                errorMsg.style.display = 'block';
+            }
+
+            // Scroll to top to see message
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('bookForm').reset();
+        }
+
+        // Auto-set current_page based on dates
+        document.getElementById('end_date').addEventListener('change', function() {
+            const pages = document.getElementById('pages').value;
+            if (this.value && pages) {
+                document.getElementById('current_page').value = pages;
+            }
+        });
+    </script>
+</body>
+</html>

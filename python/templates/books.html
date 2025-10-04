@@ -1,32 +1,574 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Reading Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Books</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #7700ff 100%);
+            color: #5c5b5b;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            color: #7700ff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #000000;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(174, 0, 255, 0.2);
+        }
+
+        .books-table {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #ffffff;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            color: #7700ff;
+            font-weight: bold;
+            border-bottom: 2px solid rgba(187, 0, 255, 0.3);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        tr:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            background: rgba(74, 144, 226, 0.2);
+            color: #4a90e2;
+        }
+
+        .status-reading {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+
+        .status-plan {
+            background: rgba(0, 0, 0, 0.2);
+            color: #95a5a6;
+        }
+
+        .rating-cell {
+            cursor: pointer;
+            color: #7700ff;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .rating-cell:hover {
+            transform: scale(1.1);
+            text-decoration: underline;
+        }
+
+        .page-progress {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #7700ff;
+            font-size: 22px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #7700ff;
+        }
+
+        .rating-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .rating-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #16213e;
+            padding: 12px 15px;
+            border-radius: 8px;
+        }
+
+        .rating-label {
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .rating-value {
+            color: #7700ff;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .rating-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(200, 102, 239, 0.2);
+            border-radius: 4px;
+            margin: 0 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rating-bar-fill {
+            height: 100%;
+            background: #7700ff;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .page-input {
+            background: #ffffff;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            color: #7700ff;
+            padding: 5px 8px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .page-input:focus {
+            outline: none;
+            border-color: #7700ff;
+        }
+
+        .action-btn-small {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .action-btn-small:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .action-btn {
+            background: #7700ff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #7700ff;
+            transform: translateY(-2px);
+        }
+
+        .progress-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: #000000;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            background: #16213e;
+            border: 2px solid rgba(153, 0, 255, 0.3);
+            color: #e0e0e0;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #7700ff;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-save {
+            background: #7700ff;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-save:hover {
+            background: #7700ff;
+        }
+
+        .btn-cancel {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: #7f8c8d;
+        }
+
+        .progress-info {
+            background: #7700ff;
+            padding: 12px;
+            border-radius: 5px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .progress-info strong {
+            color: #7700ff;
+        }
+
+        @media (max-width: 768px) {
+            .books-table {
+                padding: 15px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>📚 My Books</h1>
-    <table>
-        <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Pages</th>
-            <th>Genre</th>
-        </tr>
-        {% for book in books %}
-        <tr>
-            <td>{{ book[0] }}</td>
-            <td>{{ book[1] }}</td>
-            <td>{{ book[2] }}</td>
-            <td>{{ book[3] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="container">
+        <header>
+            <h1>📚 My Books</h1>
+            <nav class="nav-links">
+                <a href="/">Home</a>
+                <a href="/books">All Books</a>
+                <a href="/add_book">Add Book</a>
+                <a href="/analytics">Analytics</a>
+            </nav>
+        </header>
+
+        <div class="books-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Genre</th>
+                        <th>Pages</th>
+                        <th>Status</th>
+                        <th>Rating</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                    <tr>
+                        <td><strong>{{ book[1] }}</strong></td>
+                        <td>{{ book[2] }}</td>
+                        <td>{{ book[4] }}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input 
+                                    type="number" 
+                                    class="page-input" 
+                                    value="{{ book[7] }}" 
+                                    min="0" 
+                                    max="{{ book[3] }}"
+                                    onchange="updateProgress({{ book[0] }}, this.value, {{ book[3] }})"
+                                    style="width: 60px;"
+                                >
+                                <span>/{{ book[3] }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ book[14].lower().replace(' ', '-') }}">
+                                {{ book[14] }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if book[8] %}
+                                <span class="rating-cell" onclick="showRatingBreakdown('{{ book[1] }}', {{ book[9] }}, {{ book[10] }}, {{ book[11] }}, {{ book[12] }}, {{ book[13] }})">
+                                    {{ book[8] }} ⭐
+                                </span>
+                            {% else %}
+                                <span style="color: #a0a0a0;">Not rated</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="action-btn-small" onclick="window.location.href='/edit_book/{{ book[0] }}'">
+                                ✏️ Edit
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Rating Breakdown Modal -->
+    <div id="ratingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalBookTitle">Rating Breakdown</h2>
+                <button class="close-btn" onclick="closeModal('ratingModal')">&times;</button>
+            </div>
+            <div class="rating-breakdown">
+                <div class="rating-item">
+                    <span class="rating-label">Story</span>
+                    <div class="rating-bar">
+                        <div class="rating-bar-fill" id="storyBar"></div>
+                    </div>
+                    <span class="rating-value" id="storyValue">-</span>
+                </div>
+                <div class="rating-item">
+                    <span class="rating-label">Characters</span>
+                    <div class="rating-bar">
+                        <div class="rating-bar-fill" id="charactersBar"></div>
+                    </div>
+                    <span class="rating-value" id="charactersValue">-</span>
+                </div>
+                <div class="rating-item">
+                    <span class="rating-label">Writing</span>
+                    <div class="rating-bar">
+                        <div class="rating-bar-fill" id="writingBar"></div>
+                    </div>
+                    <span class="rating-value" id="writingValue">-</span>
+                </div>
+                <div class="rating-item">
+                    <span class="rating-label">Themes</span>
+                    <div class="rating-bar">
+                        <div class="rating-bar-fill" id="themesBar"></div>
+                    </div>
+                    <span class="rating-value" id="themesValue">-</span>
+                </div>
+                <div class="rating-item">
+                    <span class="rating-label">Enjoyment</span>
+                    <div class="rating-bar">
+                        <div class="rating-bar-fill" id="enjoymentBar"></div>
+                    </div>
+                    <span class="rating-value" id="enjoymentValue">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showRatingBreakdown(title, story, characters, writing, themes, enjoyment) {
+            document.getElementById('modalBookTitle').textContent = title;
+            
+            // Update values and bars
+            updateRating('story', story);
+            updateRating('characters', characters);
+            updateRating('writing', writing);
+            updateRating('themes', themes);
+            updateRating('enjoyment', enjoyment);
+            
+            // Show modal
+            document.getElementById('ratingModal').classList.add('active');
+        }
+
+        function updateRating(category, value) {
+            const percentage = (value / 5) * 100;
+            document.getElementById(category + 'Value').textContent = value;
+            document.getElementById(category + 'Bar').style.width = percentage + '%';
+        }
+
+        async function updateProgress(bookId, currentPage, totalPages) {
+            currentPage = parseInt(currentPage);
+            
+            console.log('Updating progress:', { bookId, currentPage, totalPages });
+            
+            if (currentPage < 0 || currentPage > totalPages) {
+                alert(`Please enter a page number between 0 and ${totalPages}`);
+                location.reload();
+                return;
+            }
+            
+            try {
+                const response = await fetch('/update_progress', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        book_id: bookId,
+                        current_page: currentPage
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success) {
+                    // Reload to show updated status
+                    window.location.reload();
+                } else {
+                    alert('Failed to update progress: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to update progress: ' + error.message);
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal(this.id);
+                }
+            });
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
