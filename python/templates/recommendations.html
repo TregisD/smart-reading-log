@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Recommendations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #7700ff 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            color: #7700ff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #000000;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(136, 0, 255, 0.2);
+        }
+
+        .insights-section {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .insights-section h2 {
+            color: #7700ff;
+            margin-bottom: 20px;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .insight-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .insight-card h3 {
+            color: #7700ff;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .insight-list {
+            list-style: none;
+        }
+
+        .insight-list li {
+            padding: 5px 0;
+            color: #000000;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .book-recommendation {
+            background: #16213e;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-recommendation:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(233, 69, 96, 0.3);
+        }
+
+        .book-cover-container {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .book-cover-container img {
+            max-height: 200px;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .book-cover-placeholder {
+            font-size: 64px;
+        }
+
+        .reason-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(233, 69, 96, 0.9);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .book-info {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e0e0e0;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .book-author {
+            color: #a0a0a0;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .book-genre {
+            color: #4a90e2;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .book-description {
+            color: #a0a0a0;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: auto;
+        }
+
+        .no-recommendations {
+            background: #0f3460;
+            border-radius: 10px;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .no-recommendations h2 {
+            color: #e94560;
+            margin-bottom: 15px;
+        }
+
+        .no-recommendations p {
+            color: #a0a0a0;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .recommendations-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Book Recommendations</h1>
+            <nav class="nav-links">
+                <a href="/">Home</a>
+                <a href="/books">All Books</a>
+                <a href="/add_book">Add Book</a>
+                <a href="/recommendations">Recommendations</a>
+                <a href="/analytics">Analytics</a>
+            </nav>
+        </header>
+
+        {% if top_genres or fav_authors or highly_rated %}
+        <div class="insights-section">
+            <h2>Based on Your Reading History</h2>
+            <div class="insights-grid">
+                {% if top_genres %}
+                <div class="insight-card">
+                    <h3>Your Top Genres</h3>
+                    <ul class="insight-list">
+                        {% for genre in top_genres %}
+                        <li>{{ genre }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if fav_authors %}
+                <div class="insight-card">
+                    <h3>Favorite Authors</h3>
+                    <ul class="insight-list">
+                        {% for author in fav_authors %}
+                        <li>{{ author }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if highly_rated %}
+                <div class="insight-card">
+                    <h3>Your Highest Rated Books</h3>
+                    <ul class="insight-list">
+                        {% for book in highly_rated %}
+                        <li>{{ book[0] }} ({{ book[2] }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if recommendations %}
+        <div class="recommendations-grid">
+            {% for rec in recommendations %}
+            <div class="book-recommendation">
+                <div class="book-cover-container">
+                    {% if rec.thumbnail %}
+                    <img src="{{ rec.thumbnail }}" alt="{{ rec.title }}">
+                    {% else %}
+                    <div class="book-cover-placeholder">📖</div>
+                    {% endif %}
+                    <div class="reason-badge">{{ rec.reason }}</div>
+                </div>
+                <div class="book-info">
+                    <div class="book-title">{{ rec.title }}</div>
+                    <div class="book-author">by {{ rec.authors }}</div>
+                    <div class="book-genre">{{ rec.genre }}</div>
+                    <div class="book-description">{{ rec.description }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-recommendations">
+            <h2>No Recommendations Yet</h2>
+            <p>Rate some books with 4+ stars to get personalized recommendations!</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

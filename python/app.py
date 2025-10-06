@@ -2,8 +2,9 @@ from flask import Flask, render_template, request, jsonify
 import psycopg2
 from datetime import datetime
 import os
+import requests
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../images')
 
 # Database connection details
 DB_HOST = "localhost"
@@ -47,8 +48,7 @@ def home():
     # Get total pages read
     cur.execute("""
         SELECT COALESCE(SUM(rl.current_page), 0) as total_pages
-        FROM books b
-        JOIN reading_log rl ON b.book_id = rl.book_id
+        FROM reading_log rl
         WHERE rl.start_date IS NOT NULL
             AND rl.user_id = (SELECT user_id FROM users WHERE name = 'Leonardo Guzman');
     """)
@@ -106,7 +106,8 @@ def home():
                 WHEN COALESCE(rl.current_page, 0) > 0 THEN 'Reading'
                 ELSE 'Plan to Read'
             END as status,
-            COALESCE(rl.end_date, rl.start_date, CURRENT_DATE) as last_update
+            COALESCE(rl.end_date, rl.start_date, CURRENT_DATE) as last_update,
+            b.isbn
         FROM books b
         LEFT JOIN reading_log rl ON b.book_id = rl.book_id
             AND rl.user_id = (SELECT user_id FROM users WHERE name = 'Leonardo Guzman')
@@ -115,7 +116,34 @@ def home():
         ORDER BY last_update DESC NULLS LAST
         LIMIT 3;
     """)
-    recent_books = cur.fetchall()
+    recent_books_raw = cur.fetchall()
+    
+    # Fetch cover images for recent books
+    recent_books = []
+    for book in recent_books_raw:
+        cover_url = None
+        try:
+            response = requests.get(
+                f"https://www.googleapis.com/books/v1/volumes",
+                params={"q": f"isbn:{book[7]}", "maxResults": 1},
+                timeout=3
+            )
+            if response.status_code == 200:
+                items = response.json().get('items', [])
+                if items:
+                    cover_url = items[0].get('volumeInfo', {}).get('imageLinks', {}).get('thumbnail', None)
+        except:
+            pass
+        
+        recent_books.append({
+            'title': book[0],
+            'author': book[1],
+            'start_date': book[2],
+            'end_date': book[3],
+            'overall': book[4],
+            'status': book[5],
+            'cover_url': cover_url
+        })
     
     # Get member since date (earliest start_date where current_page > 0)
     cur.execute("""
@@ -245,7 +273,6 @@ def add_book_page():
 
 @app.route("/add_book", methods=["POST"])
 def add_book():
-    from flask import request, jsonify
     
     data = request.get_json()
     
@@ -360,7 +387,6 @@ def edit_book_page(book_id):
 
 @app.route("/edit_book/<int:book_id>", methods=["POST"])
 def edit_book(book_id):
-    from flask import request, jsonify
     
     data = request.get_json()
     
@@ -433,9 +459,130 @@ def edit_book(book_id):
         conn.close()
         return jsonify({"success": False, "error": str(e)}), 400
 
+@app.route("/recommendations")
+def recommendations():
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Get user's top-rated genres
+    cur.execute("""
+        SELECT b.genre, AVG(r.overall) as avg_rating, COUNT(*) as count
+        FROM books b
+        JOIN ratings r ON b.book_id = r.book_id
+        WHERE r.overall >= 3.5
+        GROUP BY b.genre
+        ORDER BY avg_rating DESC, count DESC
+        LIMIT 3;
+    """)
+    top_genres = cur.fetchall()
+    
+    # Get user's favorite authors (rated 3.5+)
+    cur.execute("""
+        SELECT b.author, MAX(r.overall) as max_rating
+        FROM books b
+        JOIN ratings r ON b.book_id = r.book_id
+        WHERE r.overall >= 3.5
+        GROUP BY b.author
+        ORDER BY max_rating DESC
+        LIMIT 5;
+    """)
+    fav_authors = [row[0] for row in cur.fetchall()]
+    
+    # Get user's highly rated books for "similar to" recommendations
+    cur.execute("""
+        SELECT b.title, b.author, r.overall
+        FROM books b
+        JOIN ratings r ON b.book_id = r.book_id
+        WHERE r.overall >= 3.5
+        ORDER BY r.overall DESC
+        LIMIT 3;
+    """)
+    highly_rated = cur.fetchall()
+    
+    # Get all ISBNs to filter out books already in library
+    cur.execute("SELECT isbn FROM books;")
+    existing_isbns = [row[0] for row in cur.fetchall()]
+    
+    cur.close()
+    conn.close()
+    
+    # Fetch recommendations from Google Books API
+    recommendations = []
+    
+    # Genre-based recommendations
+    for genre_data in top_genres:
+        genre = genre_data[0]
+        try:
+            response = requests.get(
+                f"https://www.googleapis.com/books/v1/volumes",
+                params={
+                    "q": f"subject:{genre}",
+                    "maxResults": 10,
+                    "orderBy": "relevance"
+                },
+                timeout=5
+            )
+            if response.status_code == 200:
+                books = response.json().get('items', [])
+                for book in books[:3]:  # Take top 3 from each genre
+                    book_info = book.get('volumeInfo', {})
+                    isbn_list = book_info.get('industryIdentifiers', [])
+                    isbn = next((i['identifier'] for i in isbn_list if i['type'] in ['ISBN_13', 'ISBN_10']), None)
+                    
+                    if isbn and isbn not in existing_isbns:
+                        recommendations.append({
+                            'title': book_info.get('title', 'Unknown'),
+                            'authors': ', '.join(book_info.get('authors', ['Unknown'])),
+                            'genre': genre,
+                            'reason': f'Top-rated genre: {genre}',
+                            'thumbnail': book_info.get('imageLinks', {}).get('thumbnail', ''),
+                            'description': book_info.get('description', 'No description available')[:200] + '...'
+                        })
+                        existing_isbns.append(isbn)
+        except:
+            pass
+    
+    # Author-based recommendations
+    for author in fav_authors[:2]:  # Top 2 favorite authors
+        try:
+            response = requests.get(
+                f"https://www.googleapis.com/books/v1/volumes",
+                params={
+                    "q": f"inauthor:{author}",
+                    "maxResults": 5,
+                    "orderBy": "relevance"
+                },
+                timeout=5
+            )
+            if response.status_code == 200:
+                books = response.json().get('items', [])
+                for book in books[:2]:
+                    book_info = book.get('volumeInfo', {})
+                    isbn_list = book_info.get('industryIdentifiers', [])
+                    isbn = next((i['identifier'] for i in isbn_list if i['type'] in ['ISBN_13', 'ISBN_10']), None)
+                    
+                    if isbn and isbn not in existing_isbns:
+                        recommendations.append({
+                            'title': book_info.get('title', 'Unknown'),
+                            'authors': ', '.join(book_info.get('authors', ['Unknown'])),
+                            'genre': ', '.join(book_info.get('categories', ['Fiction'])),
+                            'reason': f'More by {author}',
+                            'thumbnail': book_info.get('imageLinks', {}).get('thumbnail', ''),
+                            'description': book_info.get('description', 'No description available')[:200] + '...'
+                        })
+                        existing_isbns.append(isbn)
+        except:
+            pass
+    
+    return render_template("recommendations.html", 
+                         recommendations=recommendations[:12],  # Limit to 12 total
+                         top_genres=[g[0] for g in top_genres],
+                         fav_authors=fav_authors,
+                         highly_rated=highly_rated)
+
 @app.route("/update_progress", methods=["POST"])
 def update_progress():
-    from flask import request, jsonify
     
     data = request.get_json()
     book_id = data.get('book_id')
