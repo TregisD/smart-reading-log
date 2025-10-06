@@ -1,65 +1,119 @@
 # smart-reading-log
 
 ## Overview
-This project will combine creating a personal dashboard to keep track of books you enjoy, as well as provide analysis on data that can be retrieved from the information input, and a machine learning recommender system to provide insights and actionable recommendations from [book dataset that has yet to be decided].
+This project is a **personal reading dashboard** that allows users to track the books they’ve read, analyze reading data, and receive personalized book recommendations using the Google Books API.  
 
-It is designed to showcase both:
-* Analytical storytelling using an Interactive Web Dashboard with SQL Data.
-* Recommender system modeling in Python.
+It showcases two main components:  
+1. **Analytical storytelling** via an interactive web dashboard with SQL data.  
+2. **Recommender system modeling** in Python to provide actionable insights.
 
+---
 
 ## Part 1: Business Analytics Dashboard (Interactive Web Dashboard with SQL Data)
-I want to create a dashboard that tracks the books you read using an Interactive Web Dashboard with SQL Data. I will be adding a rating system to keep track of how much one likes a book. The rating system will contain five sub-categories: Story & Pacing, Characters & Development, Writing Style, Themes & Depth, and Emotional Impact & Enjoyment. This system will allow more in-depth analysis of how one rates a book. There will be multiple pages.
 
-### The Home page displays:
-* When you became a member (your earliest start date)
-* The total books in your database that include the ones you've completed, you're reading, and that you plan to read
-* The average number of pages you read a day
-* The number of books you've read this month and this year
-* The total number of pages you've read
-* You're recent updates (Last three books updated)
+The dashboard provides a comprehensive way to track your reading habits and rate books across multiple dimensions. The rating system includes five sub-categories:  
+- Story & Pacing  
+- Characters & Development  
+- Writing Style  
+- Themes & Depth  
+- Emotional Impact & Enjoyment  
+
+This enables **more in-depth analysis** of your reading preferences.
+
+### Home Page
+Displays key statistics at a glance:  
+- Member since (earliest start date)  
+- Total books in your library (completed, currently reading, planned)  
+- Average pages read per day  
+- Books read this month and year  
+- Total pages read  
+- Most recent updates (last three books updated)  
+
+#### Preview
+![](images/HomePage_V3.png)
+
+---
+
+### All Books Page
+Shows detailed information about each book in your library:  
+- Title  
+- Author  
+- Genre  
+- Pages read / Total pages  
+- Reading status  
+- Ratings (click to see category breakdown)  
+- Edit button for modifications  
+
+#### Preview
+![](images/Booklist_V2.png)
+
+---
+
+### Add Book / Edit Book Pages
+Allows users to input or edit book information, including:  
+- All fields from the All Books page  
+- Current pages read  
+- Start and end dates  
+- ISBN  
+
+#### Preview
+![](images/Add_book_V2.png)
+
+---
+
+### Analytics Page
+Visualizes reading habits and book ratings using interactive charts:  
+- **Spider chart** for average rating per category  
+- **Trend line** for pages read per day  
+- **Pie chart** for genre distribution  
+- **Bar chart** for average rating per genre  
+- **Bar chart** showing rating distribution from 1.0 to 5.0  
+
+#### Preview
+[Add screenshot when finished]
+
+
+
+## Part 2: Book Recommender System
+
+This project provides **personalized book recommendations** tailored to a user’s reading history, favorite authors, and top genres. It integrates with the **Google Books API** to fetch up-to-date book information, including titles, authors, genres, thumbnails, and descriptions.
+
+### Features
+
+- **Genre-based recommendations**
+  - Analyzes the user’s top-read genres.
+  - Fetches highly-rated books from Google Books in those genres.
+  - Filters out books the user already owns using ISBN.
+
+- **Author-based recommendations**
+  - Considers the user’s favorite authors.
+  - Suggests additional works by those authors, avoiding duplicates.
+
+- **Duplicate avoidance**
+  - Checks existing books in the user’s library (by ISBN) to prevent repeated recommendations.
+
+- **Book details included**
+  - Title, authors, genre(s), short description (truncated to 200 characters), and a thumbnail image.
+  - Gracefully handles missing information (e.g., no description or thumbnail).
+
+- **Curation and limits**
+  - Returns up to **12 recommendations** per user session.
+  - Shuffles results to provide a diverse selection each time.
+
+### Implementation Details
+
+- **Backend:** Python + Flask  
+- **API Integration:** Google Books API (`volumes` endpoint)  
+- **Database:** Stores existing books with ISBNs for duplicate checking.  
+- **Error Handling:**  
+  - Skips over network errors or missing fields without crashing.
+  - Handles missing thumbnails and descriptions gracefully.
+
+### Notes
+
+- Recommendations are **dynamic**; Google Books API results may change over time.
+- Thumbnail images may occasionally not load if Google’s temporary URLs expire.
+- Optional improvements include caching API responses to provide more consistent recommendations.
 
 #### Preview:
-![](images/HomePage_V2.png)
-
-
-### The All Books page displays information on the books in your list, such as:
-* Title
-* Author
-* Genre
-* Pages You've Read / Total Pages
-* Reading Status
-* Rating (If you click on the rating button, it shows the distribution of which categories got what score)
-* Edit button
-
-#### Preview:
-![](images/Booklist_V1.png)
-
-
-### The Add Book and Edit Book pages allow you to input or edit:
-* All the information in the All Books page
-* Current pages read
-* Start and End dates
-* ISBN
-
-#### Preview (the edit book page looks the same with a different title):
-![](images/Add_book_V1.png)
-
-
-### The analytics page displays:
-* A spider chart breaking down the average rating of each category
-* A trend line on how many pages you read a day
-* A pie chart showing the distribution of genres you read
-* A bar chart showing the average rating per genre
-* A bar chart showing how many books you rated 1.0, 1.5, 2.0... up to 5.0
-
-#### Preview:
-[add when finished]
-
-
-## Things I need to work on asap:
-* More of the analytics page
-
-
-## Part 2: Recommender System (Python)
-I want to create a recommender system based on the books you've read and liked. It will examine the overall rating (the average of the five sub-categories) you provided, the genre, the number of pages, and any other relevant factors that come to mind.
+![](images/Recommendations_V1.png)
